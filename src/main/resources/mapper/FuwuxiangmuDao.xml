@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.FuwuxiangmuDao">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        a.id as id
+        ,a.fuwuxiangmu_name as fuwuxiangmuName
+        ,a.fuwuxiangmu_types as fuwuxiangmuTypes
+        ,a.fuwuxiangmu_photo as fuwuxiangmuPhoto
+        ,a.fuwuxiangmu_content as fuwuxiangmuContent
+        ,a.fuwuxiangmu_delete as fuwuxiangmuDelete
+        ,a.insert_time as insertTime
+        ,a.create_time as createTime
+    </sql>
+    <select id="selectListView" parameterType="map" resultType="com.entity.view.FuwuxiangmuView" >
+        SELECT
+        <include refid="Base_Column_List" />
+
+--         级联表的字段
+
+        FROM fuwuxiangmu  a
+
+        <where>
+            <if test="params.ids != null">
+                and a.id in
+                <foreach item="item" index="index" collection="params.ids" open="(" separator="," close=")">
+                #{item}
+                </foreach>
+            </if>
+            <if test=" params.fuwuxiangmuName != '' and params.fuwuxiangmuName != null and params.fuwuxiangmuName != 'null' ">
+                and a.fuwuxiangmu_name like CONCAT('%',#{params.fuwuxiangmuName},'%')
+            </if>
+            <if test="params.fuwuxiangmuTypes != null and params.fuwuxiangmuTypes != ''">
+                and a.fuwuxiangmu_types = #{params.fuwuxiangmuTypes}
+            </if>
+            <if test=" params.fuwuxiangmuContent != '' and params.fuwuxiangmuContent != null and params.fuwuxiangmuContent != 'null' ">
+                and a.fuwuxiangmu_content like CONCAT('%',#{params.fuwuxiangmuContent},'%')
+            </if>
+            <if test="params.fuwuxiangmuDeleteStart != null and params.fuwuxiangmuDeleteStart != ''">
+                <![CDATA[  and a.fuwuxiangmu_delete >= #{params.fuwuxiangmuDeleteStart}   ]]>
+            </if>
+            <if test="params.fuwuxiangmuDeleteEnd != null and params.fuwuxiangmuDeleteEnd != ''">
+                <![CDATA[  and a.fuwuxiangmu_delete <= #{params.fuwuxiangmuDeleteEnd}   ]]>
+            </if>
+             <if test="params.fuwuxiangmuDelete != null and params.fuwuxiangmuDelete != ''">
+                and a.fuwuxiangmu_delete = #{params.fuwuxiangmuDelete}
+             </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+
+        </where>
+        order by a.${params.sort} ${params.order}
+    </select>
+
+</mapper>

@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.JiashuDao">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        a.id as id
+        ,a.username as username
+        ,a.password as password
+        ,a.jiashu_name as jiashuName
+        ,a.sex_types as sexTypes
+        ,a.jiashu_photo as jiashuPhoto
+        ,a.jiashu_phone as jiashuPhone
+        ,a.jiashu_email as jiashuEmail
+        ,a.shenfen_types as shenfenTypes
+        ,a.yonghu_id as yonghuId
+        ,a.jiashu_delete as jiashuDelete
+        ,a.create_time as createTime
+    </sql>
+    <select id="selectListView" parameterType="map" resultType="com.entity.view.JiashuView" >
+        SELECT
+        <include refid="Base_Column_List" />
+
+--         级联表的字段
+        ,yonghu.yonghu_name as yonghuName
+        ,yonghu.yonghu_photo as yonghuPhoto
+        ,yonghu.yonghu_id_number as yonghuIdNumber
+        ,yonghu.yonghu_phone as yonghuPhone
+        ,yonghu.yonghu_email as yonghuEmail
+        ,yonghu.yonghu_age as yonghuAge
+        ,yonghu.jiankang_types as jiankangTypes
+        ,yonghu.yonghu_delete as yonghuDelete
+
+        FROM jiashu  a
+        left JOIN yonghu yonghu ON a.yonghu_id = yonghu.id
+
+        <where>
+            <if test="params.ids != null">
+                and a.id in
+                <foreach item="item" index="index" collection="params.ids" open="(" separator="," close=")">
+                #{item}
+                </foreach>
+            </if>
+            <if test=" params.username != '' and params.username != null and params.username != 'null' ">
+                and a.username like CONCAT('%',#{params.username},'%')
+            </if>
+            <if test=" params.password != '' and params.password != null and params.password != 'null' ">
+                and a.password like CONCAT('%',#{params.password},'%')
+            </if>
+            <if test=" params.jiashuName != '' and params.jiashuName != null and params.jiashuName != 'null' ">
+                and a.jiashu_name like CONCAT('%',#{params.jiashuName},'%')
+            </if>
+            <if test="params.sexTypes != null and params.sexTypes != ''">
+                and a.sex_types = #{params.sexTypes}
+            </if>
+            <if test=" params.jiashuPhone != '' and params.jiashuPhone != null and params.jiashuPhone != 'null' ">
+                and a.jiashu_phone like CONCAT('%',#{params.jiashuPhone},'%')
+            </if>
+            <if test=" params.jiashuEmail != '' and params.jiashuEmail != null and params.jiashuEmail != 'null' ">
+                and a.jiashu_email like CONCAT('%',#{params.jiashuEmail},'%')
+            </if>
+            <if test="params.shenfenTypes != null and params.shenfenTypes != ''">
+                and a.shenfen_types = #{params.shenfenTypes}
+            </if>
+            <if test="params.yonghuId != null and params.yonghuId != ''">
+                and (
+                    a.yonghu_id = #{params.yonghuId}
+                )
+            </if>
+            <if test="params.jiashuDeleteStart != null and params.jiashuDeleteStart != ''">
+                <![CDATA[  and a.jiashu_delete >= #{params.jiashuDeleteStart}   ]]>
+            </if>
+            <if test="params.jiashuDeleteEnd != null and params.jiashuDeleteEnd != ''">
+                <![CDATA[  and a.jiashu_delete <= #{params.jiashuDeleteEnd}   ]]>
+            </if>
+             <if test="params.jiashuDelete != null and params.jiashuDelete != ''">
+                and a.jiashu_delete = #{params.jiashuDelete}
+             </if>
+
+                <!-- 判断老人的id不为空 -->
+            <if test=" params.yonghuIdNotNull != '' and params.yonghuIdNotNull != null and params.yonghuIdNotNull != 'null' ">
+                and a.yonghu_id IS NOT NULL
+            </if>
+            <if test=" params.yonghuName != '' and params.yonghuName != null and params.yonghuName != 'null' ">
+                and yonghu.yonghu_name like CONCAT('%',#{params.yonghuName},'%')
+            </if>
+            <if test=" params.yonghuIdNumber != '' and params.yonghuIdNumber != null and params.yonghuIdNumber != 'null' ">
+                and yonghu.yonghu_id_number like CONCAT('%',#{params.yonghuIdNumber},'%')
+            </if>
+            <if test=" params.yonghuPhone != '' and params.yonghuPhone != null and params.yonghuPhone != 'null' ">
+                and yonghu.yonghu_phone like CONCAT('%',#{params.yonghuPhone},'%')
+            </if>
+            <if test=" params.yonghuEmail != '' and params.yonghuEmail != null and params.yonghuEmail != 'null' ">
+                and yonghu.yonghu_email like CONCAT('%',#{params.yonghuEmail},'%')
+            </if>
+            <if test="params.yonghuAgeStart != null  and params.yonghuAgeStart != '' ">
+                <![CDATA[  and yonghu.yonghu_age >= #{params.yonghuAgeStart}   ]]>
+            </if>
+            <if test="params.yonghuAgeEnd != null  and params.yonghuAgeEnd != '' ">
+                <![CDATA[  and yonghu.yonghu_age <= #{params.yonghuAgeEnd}   ]]>
+            </if>
+            <if test="params.yonghuAge != null  and params.yonghuAge != '' ">
+                and yonghu.yonghu_age = #{params.yonghuAge}
+            </if>
+            <if test="params.jiankangTypes != null  and params.jiankangTypes != ''">
+                and yonghu.jiankang_types = #{params.jiankangTypes}
+            </if>
+
+            <if test="params.yonghuDeleteStart != null  and params.yonghuDeleteStart != '' ">
+                <![CDATA[  and yonghu.yonghu_delete >= #{params.yonghuDeleteStart}   ]]>
+            </if>
+            <if test="params.yonghuDeleteEnd != null  and params.yonghuDeleteEnd != '' ">
+                <![CDATA[  and yonghu.yonghu_delete <= #{params.yonghuDeleteEnd}   ]]>
+            </if>
+            <if test="params.yonghuDelete != null  and params.yonghuDelete != '' ">
+                and yonghu.yonghu_delete = #{params.yonghuDelete}
+            </if>
+        </where>
+        order by a.${params.sort} ${params.order}
+    </select>
+
+</mapper>

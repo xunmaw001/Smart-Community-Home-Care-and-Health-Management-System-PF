@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.DaibanshiyiDao">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        a.id as id
+        ,a.daibanshiyi_name as daibanshiyiName
+        ,a.daibanshiyi_types as daibanshiyiTypes
+        ,a.gongzuorenyuan_id as gongzuorenyuanId
+        ,a.daibanshiyi_photo as daibanshiyiPhoto
+        ,a.daibanshiyi_content as daibanshiyiContent
+        ,a.daibanshiyi_delete as daibanshiyiDelete
+        ,a.insert_time as insertTime
+        ,a.create_time as createTime
+    </sql>
+    <select id="selectListView" parameterType="map" resultType="com.entity.view.DaibanshiyiView" >
+        SELECT
+        <include refid="Base_Column_List" />
+
+--         级联表的字段
+        ,gongzuorenyuan.gongzuorenyuan_name as gongzuorenyuanName
+        ,gongzuorenyuan.gongzuorenyuan_photo as gongzuorenyuanPhoto
+        ,gongzuorenyuan.gongzuorenyuan_phone as gongzuorenyuanPhone
+        ,gongzuorenyuan.gongzuorenyuan_email as gongzuorenyuanEmail
+        ,gongzuorenyuan.gongzuorenyuan_delete as gongzuorenyuanDelete
+
+        FROM daibanshiyi  a
+        left JOIN gongzuorenyuan gongzuorenyuan ON a.gongzuorenyuan_id = gongzuorenyuan.id
+
+        <where>
+            <if test="params.ids != null">
+                and a.id in
+                <foreach item="item" index="index" collection="params.ids" open="(" separator="," close=")">
+                #{item}
+                </foreach>
+            </if>
+            <if test=" params.daibanshiyiName != '' and params.daibanshiyiName != null and params.daibanshiyiName != 'null' ">
+                and a.daibanshiyi_name like CONCAT('%',#{params.daibanshiyiName},'%')
+            </if>
+            <if test="params.daibanshiyiTypes != null and params.daibanshiyiTypes != ''">
+                and a.daibanshiyi_types = #{params.daibanshiyiTypes}
+            </if>
+            <if test="params.gongzuorenyuanId != null and params.gongzuorenyuanId != ''">
+                and (
+                    a.gongzuorenyuan_id = #{params.gongzuorenyuanId}
+                )
+            </if>
+            <if test=" params.daibanshiyiContent != '' and params.daibanshiyiContent != null and params.daibanshiyiContent != 'null' ">
+                and a.daibanshiyi_content like CONCAT('%',#{params.daibanshiyiContent},'%')
+            </if>
+            <if test="params.daibanshiyiDeleteStart != null and params.daibanshiyiDeleteStart != ''">
+                <![CDATA[  and a.daibanshiyi_delete >= #{params.daibanshiyiDeleteStart}   ]]>
+            </if>
+            <if test="params.daibanshiyiDeleteEnd != null and params.daibanshiyiDeleteEnd != ''">
+                <![CDATA[  and a.daibanshiyi_delete <= #{params.daibanshiyiDeleteEnd}   ]]>
+            </if>
+             <if test="params.daibanshiyiDelete != null and params.daibanshiyiDelete != ''">
+                and a.daibanshiyi_delete = #{params.daibanshiyiDelete}
+             </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+
+                <!-- 判断社区工作人员的id不为空 -->
+            <if test=" params.gongzuorenyuanIdNotNull != '' and params.gongzuorenyuanIdNotNull != null and params.gongzuorenyuanIdNotNull != 'null' ">
+                and a.gongzuorenyuan_id IS NOT NULL
+            </if>
+            <if test=" params.gongzuorenyuanName != '' and params.gongzuorenyuanName != null and params.gongzuorenyuanName != 'null' ">
+                and gongzuorenyuan.gongzuorenyuan_name like CONCAT('%',#{params.gongzuorenyuanName},'%')
+            </if>
+            <if test=" params.gongzuorenyuanPhone != '' and params.gongzuorenyuanPhone != null and params.gongzuorenyuanPhone != 'null' ">
+                and gongzuorenyuan.gongzuorenyuan_phone like CONCAT('%',#{params.gongzuorenyuanPhone},'%')
+            </if>
+            <if test=" params.gongzuorenyuanEmail != '' and params.gongzuorenyuanEmail != null and params.gongzuorenyuanEmail != 'null' ">
+                and gongzuorenyuan.gongzuorenyuan_email like CONCAT('%',#{params.gongzuorenyuanEmail},'%')
+            </if>
+            <if test="params.gongzuorenyuanDeleteStart != null  and params.gongzuorenyuanDeleteStart != '' ">
+                <![CDATA[  and gongzuorenyuan.gongzuorenyuan_delete >= #{params.gongzuorenyuanDeleteStart}   ]]>
+            </if>
+            <if test="params.gongzuorenyuanDeleteEnd != null  and params.gongzuorenyuanDeleteEnd != '' ">
+                <![CDATA[  and gongzuorenyuan.gongzuorenyuan_delete <= #{params.gongzuorenyuanDeleteEnd}   ]]>
+            </if>
+            <if test="params.gongzuorenyuanDelete != null  and params.gongzuorenyuanDelete != '' ">
+                and gongzuorenyuan.gongzuorenyuan_delete = #{params.gongzuorenyuanDelete}
+            </if>
+        </where>
+        order by a.${params.sort} ${params.order}
+    </select>
+
+</mapper>
